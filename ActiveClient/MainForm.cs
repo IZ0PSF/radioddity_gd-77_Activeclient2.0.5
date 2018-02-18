@@ -149,21 +149,14 @@ namespace ActiveClient
 
 		private const int MAX_COMM_LEN = 32;
 
-		private static readonly byte[] FRAME_ENCRYPT_VER;
-
-		private static readonly byte[] FRAME_MCU_ID;
-
-		private static readonly byte[] FRAME_TMP_ACTIVE;
-
-		private static readonly byte[] FRAME_ACTIVE;
-
-		private static readonly byte[] FRAME_PROGRAM;
-
-		private static readonly byte[] FRAME_PROGRAM2;
-
-		private static readonly byte[] FRAME_ENDR;
-
-		private static readonly byte[] FRAME_ENDW;
+        private static readonly byte[] FRAME_ENCRYPT_VER = new byte[4] { 67, 82, 65, 2 };
+        private static readonly byte[] FRAME_MCU_ID = new byte[4] { 67, 82, 65, 16 };
+        private static readonly byte[] FRAME_TMP_ACTIVE = new byte[5] { 67, 87, 65, 1, 1 };
+        private static readonly byte[] FRAME_ACTIVE = new byte[4] { 67, 87, 65, 32 };
+        private static readonly byte[] FRAME_PROGRAM = new byte[7] { 2, 80, 82, 79, 71, 82, 65 };
+        private static readonly byte[] FRAME_PROGRAM2 = new byte[2] { 77, 2 };
+        private static readonly byte[] FRAME_ENDR = Encoding.ASCII.GetBytes("ENDR");
+        private static readonly byte[] FRAME_ENDW = Encoding.ASCII.GetBytes("ENDW");
 
 		public List<IdInfo> lstIdInfo;
 
@@ -608,6 +601,7 @@ namespace ActiveClient
 			this.Buffer = new List<byte>();
 			//base._002Ector();
 			this.InitializeComponent();
+            this.Text = "GD-77 DMR ID database utility";
 		}
 
 		private void MainForm_Load(object sender, EventArgs e)
@@ -1475,6 +1469,7 @@ namespace ActiveClient
 		static MainForm()
 		{
 			//Class5.XCUF1frzK2Woy();
+            /*
 			MainForm.FRAME_ENCRYPT_VER = new byte[4]
 			{
 				67,
@@ -1521,6 +1516,7 @@ namespace ActiveClient
 			};
 			MainForm.FRAME_ENDR = Encoding.ASCII.GetBytes("ENDR");
 			MainForm.FRAME_ENDW = Encoding.ASCII.GetBytes("ENDW");
+             * */
 		}
 	}
 }
