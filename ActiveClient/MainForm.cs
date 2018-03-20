@@ -1,4 +1,4 @@
-using DMR;
+//using DMR;
 using ReadWriteCsv;
 using System;
 using System.Collections.Generic;
@@ -77,76 +77,41 @@ namespace ActiveClient
 			}
 		}
 
-		private const byte CMD_READ = 82;
-
-		private const byte CMD_WRITE = 87;
-
-		private const byte CMD_ACTIVE = 65;
-
+		private const byte CMD_READ = 82;// Letter 'R'
+		private const byte CMD_WRITE = 87;// Letter 'W'
+		private const byte CMD_ACTIVE = 65;// Letter 'A'
 		private const byte CMD_COMMAND = 67;
-
-		private const byte CMD_CHANAGE_BASEADDR = 66;
-
+		private const byte CMD_CHANAGE_BASEADDR = 66; // Letter 'B'
 		private const byte CMD_ENCRYPT_VER = 2;
-
 		private const byte CMD_MCU_ID = 16;
-
 		private const byte CMD_TMP_ACTIVE = 1;
-
 		private const byte DATA_ACTIVE = 1;
-
 		private const byte CMD_ACK = 65;
-
 		private const byte CMD_NACK = 78;
-
 		private const byte CMD_ACTIVE_LENGTH = 32;
-
 		private const byte LEN_HID_HEAD = 4;
-
 		private const byte LEN_DATA_HEAD = 4;
-
 		public const int MAX_ID_COUNT = 10920;
-
-		public const int ID_BASE_ADDR = 196608;
-
-		public const int ID_BASE_END_ADDR = 327680;
-
-		public const int ID_VERSION_ADDR = 196612;
-
+		public const int ID_BASE_ADDR = 0x30000;
+		public const int ID_BASE_END_ADDR = 0x50000;
+		public const int ID_VERSION_ADDR = 0x30004;
 		public const int SPACE_VERSION = 4;
-
-		public const int ID_COUNT_ADDR = 196616;
-
-		public const int ID_START_ADDR = 196620;
-
+		public const int ID_COUNT_ADDR = 0x30008;
+		public const int ID_START_ADDR = 0x3000C;
 		public const int INDEX_ID = 0;
-
 		public const int SPACE_ID = 4;
-
 		public const int INDEX_CALL_SIGN = 4;
-
 		public const int SPACE_CALL_SIGN = 8;
-
 		public const int SPACE_ID_INFO = 12;
-
 		public const string SZ_DATABASE_NOT_EXIST = "The database file does not exist";
-
 		public const string SZ_NOT_ACK = "No response received";
-
 		public const string SZ_DEVICE_NOT_FOUND = "Device not found";
-
 		public const string SZ_SAVE_SUCCESS = "Save successfully";
-
 		public const string SZ_SAVE_FAIL = "Save failed";
-
 		public const string SZ_OPEN_SUCCESS = "Open successfully";
-
 		public const string SZ_DATA_FORMAT_WRONG = "The data format is wrong";
-
 		public const string SZ_ID_OVER = "ID over {0}";
-
 		private const int EeromLen = 1048576;
-
 		private const int MAX_COMM_LEN = 32;
 
         private static readonly byte[] FRAME_ENCRYPT_VER = new byte[4] { 67, 82, 65, 2 };
@@ -159,55 +124,29 @@ namespace ActiveClient
         private static readonly byte[] FRAME_ENDW = Encoding.ASCII.GetBytes("ENDW");
 
 		public List<IdInfo> lstIdInfo;
-
 		private SQLiteConnection conn;
-
 		private SQLiteCommand cmd;
-
 		private SQLiteHelper sh;
-
 		public byte[] Eerom;
-
 		public List<byte> Buffer;
-
 		private IContainer components;
-
 		private UsbHidPort usbHidPort;
-
 		private System.Windows.Forms.Timer tmrDataRx;
-
 		private ListBox lstInfo;
-
 		private ProgressBar prgAddr;
-
 		private Button btnReadData;
-
 		private Button btnSave;
-
 		private Button btnWrite;
-
 		private Button btnOpen;
-
 		private OpenFileDialog ofdMain;
-
 		private TextBox txtOffsetAddr;
-
 		private Label lblOffsetAddr;
-
 		private Label lblPos;
-
-		private Button btnPort;
-
 		private SerialPort sptMain;
-
 		private DataGridView dgvId;
-
 		private TextBox txtVersion;
-
 		private Label lblVersion;
-
 		private Button btnImportCsv;
-
 		private OpenFileDialog ofdCsv;
 
 		public CurStepE CurStep
@@ -329,11 +268,11 @@ namespace ActiveClient
             string errorMsg4 = "The Green menu button\n";
             string errorMsg5 = "and the hash (#) button";
             MessageBox.Show(errorMsg1 + errorMsg2 + errorMsg3 + errorMsg4 + errorMsg5 , "Error");
-            this.method_4("Error." + errorMsg1);
-            this.method_4( errorMsg2);
-            this.method_4(errorMsg3);
-            this.method_4(errorMsg4);
-            this.method_4(errorMsg5);
+            this.displayMessage("Error." + errorMsg1);
+            this.displayMessage( errorMsg2);
+            this.displayMessage(errorMsg3);
+            this.displayMessage(errorMsg4);
+            this.displayMessage(errorMsg5);
         }
 
 		private void usbHidPort_OnDataRecieved(object sender, DataRecievedEventArgs e)
@@ -352,7 +291,7 @@ namespace ActiveClient
 			{
 				if (array.Length == 16)
 				{
-					this.method_9();
+					this.sendLetter_A();
 				}
 			}
 			else if (this.CurStep == CurStepE.ACK)
@@ -399,7 +338,7 @@ namespace ActiveClient
 				{
 					if (array[0] == 78)
 					{
-                        this.method_4("The mode is wrong");
+                        this.displayMessage("The mode is wrong");
 					}
 					else
 					{
@@ -432,8 +371,8 @@ namespace ActiveClient
 							}
 							else
 							{
-								this.method_4("Id already exists");
-								this.method_19();
+								this.displayMessage("Id already exists");
+								this.sendENDR();
 							}
 						}
 						else
@@ -442,8 +381,8 @@ namespace ActiveClient
 							dictionary2["McuId"] = array2;
 							dictionary2["ActiveCode"] = null;
 							this.sh.Insert("ActiveTable", dictionary2);
-                            this.method_4("Get Id successful");
-							this.method_19();
+                            this.displayMessage("Get Id successful");
+							this.sendENDR();
 						}
 					}
 				}
@@ -454,11 +393,11 @@ namespace ActiveClient
 				{
 					if (array[0] == 65)
 					{
-						this.method_20();
+						this.sendENDW();
 					}
 					else if (array[0] == 78)
 					{
-                        this.method_4("Activation code error");
+                        this.displayMessage("Activation code error");
 					}
 				}
 			}
@@ -466,7 +405,7 @@ namespace ActiveClient
 			{
 				if (array.Length > 0 && array[0] == 65)
 				{
-					this.method_20();
+					this.sendENDW();
 				}
 			}
 			else if (this.CurStep == CurStepE.Read)
@@ -490,7 +429,7 @@ namespace ActiveClient
 					if (this.CurSubStep == CurSubStepE.Read)
 					{
 						base.Invoke(new MethodInvoker(this.method_7));
-                        this.method_4("Read data successfully");
+                        this.displayMessage("Read data successfully");
 					}
 					this.CurSubStep = CurSubStepE.None;
 					this.CurStep = CurStepE.None;
@@ -511,15 +450,15 @@ namespace ActiveClient
 					Dictionary<string, object> dictionary3 = new Dictionary<string, object>();
 					dictionary3["McuId"] = MainForm.CurMcuId;
 					this.sh.Execute("delete from ActiveTable where McuId = @McuId", dictionary3);
-                    this.method_4("Activation successful");
+                    this.displayMessage("Activation successful");
 				}
 				else if (this.CurSubStep == CurSubStepE.TempActive)
 				{
-                    this.method_4("Temporary activation success");
+                    this.displayMessage("Temporary activation success");
 				}
 				else if (this.CurSubStep == CurSubStepE.Write)
 				{
-                    this.method_4("Write data successfully");
+                    this.displayMessage("Write data successfully");
 				}
 				this.CurSubStep = CurSubStepE.None;
 				this.CurStep = CurStepE.None;
@@ -545,7 +484,6 @@ namespace ActiveClient
 		private int method_0(int int_0, int int_1)
 		{
 			int num = 0;
-//			int num2 = 0;
 			num = int_0 % 32;
 			if (int_0 + 32 > int_1)
 			{
@@ -595,11 +533,9 @@ namespace ActiveClient
 
 		public MainForm()
 		{
-		//	Class5.XCUF1frzK2Woy();
 			this.lstIdInfo = new List<IdInfo>();
 			this.Eerom = new byte[1048576];
 			this.Buffer = new List<byte>();
-			//base._002Ector();
 			this.InitializeComponent();
             this.Text = "GD-77 DMR ID database utility";
 		}
@@ -608,8 +544,8 @@ namespace ActiveClient
 		{
 			this.usbHidPort.CheckDevicePresent();
 			SpecifiedDevice specifiedDevice = this.usbHidPort.SpecifiedDevice;
-			MainForm.CurCom = Class1.smethod_4("Setup", "Com", "Com1");
-			MainForm.CurCbr = Class1.smethod_2("Setup", "Baudrate", 9600);
+			MainForm.CurCom = IniFileUtils.smethod_4("Setup", "Com", "Com1");
+			MainForm.CurCbr = IniFileUtils.smethod_2("Setup", "Baudrate", 9600);
 			this.method_22();
 			this.method_3();
 		}
@@ -659,11 +595,11 @@ namespace ActiveClient
 			MessageBox.Show("No response received");
 		}
 
-		private void method_4(string string_0)
+		private void displayMessage(string string_0)
 		{
 			if (this.lstInfo.InvokeRequired)
 			{
-				this.lstInfo.Invoke(new Action<string>(this.method_4), string_0);
+				this.lstInfo.Invoke(new Action<string>(this.displayMessage), string_0);
 			}
 			else
 			{
@@ -721,12 +657,12 @@ namespace ActiveClient
 		private void method_7()
 		{
 			this.lstIdInfo.Clear();
-			uint num = BitConverter.ToUInt32(this.Eerom, 196616);
-			this.txtVersion.Text = Encoding.ASCII.GetString(this.Eerom, 196612, 4);
+			uint num = BitConverter.ToUInt32(this.Eerom, ID_COUNT_ADDR);
+			this.txtVersion.Text = Encoding.ASCII.GetString(this.Eerom, ID_VERSION_ADDR, 4);
 			for (int i = 0; i < num; i++)
 			{
 				byte[] array = new byte[12];
-				System.Buffer.BlockCopy(this.Eerom, 196620 + i * 12, array, 0, array.Length);
+				System.Buffer.BlockCopy(this.Eerom, ID_START_ADDR + i * 12, array, 0, array.Length);
 				this.lstIdInfo.Add(new IdInfo
 				{
 					Id = MainForm.smethod_0(BitConverter.ToUInt32(array, 0)),
@@ -760,7 +696,7 @@ namespace ActiveClient
 				{
 					if (array2.Length == 16)
 					{
-						this.method_9();
+						this.sendLetter_A();
 					}
 				}
 				else if (this.CurStep == CurStepE.ACK)
@@ -807,7 +743,7 @@ namespace ActiveClient
 					{
 						if (array2[0] == 78)
 						{
-                            this.method_4("The mode is wrong");
+                            this.displayMessage("The mode is wrong");
 						}
 						else
 						{
@@ -840,8 +776,8 @@ namespace ActiveClient
 								}
 								else
 								{
-									this.method_4("Id 已经存在");
-									this.method_19();
+									this.displayMessage("Id 已经存在");
+									this.sendENDR();
 								}
 							}
 							else
@@ -850,8 +786,8 @@ namespace ActiveClient
 								dictionary2["McuId"] = array3;
 								dictionary2["ActiveCode"] = null;
 								this.sh.Insert("ActiveTable", dictionary2);
-                                this.method_4("Get Id successful");
-								this.method_19();
+                                this.displayMessage("Get Id successful");
+								this.sendENDR();
 							}
 						}
 					}
@@ -862,11 +798,11 @@ namespace ActiveClient
 					{
 						if (array2[0] == 65)
 						{
-							this.method_20();
+							this.sendENDW();
 						}
 						else if (array2[0] == 78)
 						{
-                            this.method_4("Activation code error");
+                            this.displayMessage("Activation code error");
 						}
 					}
 				}
@@ -874,7 +810,7 @@ namespace ActiveClient
 				{
 					if (array2.Length > 0 && array2[0] == 65)
 					{
-						this.method_20();
+						this.sendENDW();
 					}
 				}
 				else if (this.CurStep == CurStepE.Read)
@@ -897,7 +833,7 @@ namespace ActiveClient
 					{
 						if (this.CurSubStep == CurSubStepE.Read)
 						{
-                            this.method_4("Read data successfully");
+                            this.displayMessage("Read data successfully");
 						}
 						this.CurSubStep = CurSubStepE.None;
 						this.CurStep = CurStepE.None;
@@ -918,15 +854,15 @@ namespace ActiveClient
 						Dictionary<string, object> dictionary3 = new Dictionary<string, object>();
 						dictionary3["McuId"] = MainForm.CurMcuId;
 						this.sh.Execute("delete from ActiveTable where McuId = @McuId", dictionary3);
-                        this.method_4("Activation successful");
+                        this.displayMessage("Activation successful");
 					}
 					else if (this.CurSubStep == CurSubStepE.TempActive)
 					{
-                        this.method_4("Temporary activation success");
+                        this.displayMessage("Temporary activation success");
 					}
 					else if (this.CurSubStep == CurSubStepE.Write)
 					{
-                        this.method_4("Write data successfully");
+                        this.displayMessage("Write data successfully");
 					}
 					this.CurSubStep = CurSubStepE.None;
 					this.CurStep = CurStepE.None;
@@ -936,19 +872,19 @@ namespace ActiveClient
 
 		private void fEcjRtaQO()
 		{
-			this.method_21(MainForm.FRAME_PROGRAM);
+			this.checkForDeviceAndSend(MainForm.FRAME_PROGRAM);
 			this.CurStep = CurStepE.Program;
 		}
 
 		private void method_8()
 		{
-			this.method_21(MainForm.FRAME_PROGRAM2);
+			this.checkForDeviceAndSend(MainForm.FRAME_PROGRAM2);
 			this.CurStep = CurStepE.ProgramTwo;
 		}
 
-		private void method_9()
+		private void sendLetter_A()
 		{
-			this.method_21(new byte[1]
+			this.checkForDeviceAndSend(new byte[1]
 			{
 				65
 			});
@@ -957,19 +893,19 @@ namespace ActiveClient
 
 		private void method_10()
 		{
-			this.method_21(MainForm.FRAME_ENCRYPT_VER);
+			this.checkForDeviceAndSend(MainForm.FRAME_ENCRYPT_VER);
 			this.CurStep = CurStepE.EncryptVersion;
 		}
 
 		private void method_11()
 		{
-			this.method_21(MainForm.FRAME_MCU_ID);
+			this.checkForDeviceAndSend(MainForm.FRAME_MCU_ID);
 			this.CurStep = CurStepE.McuId;
 		}
 
 		private void method_12()
 		{
-			this.method_21(MainForm.FRAME_TMP_ACTIVE);
+			this.checkForDeviceAndSend(MainForm.FRAME_TMP_ACTIVE);
 			this.CurStep = CurStepE.TmpActive;
 		}
 
@@ -978,7 +914,7 @@ namespace ActiveClient
 			byte[] array = new byte[4 + byte_0.Length];
 			Array.Copy(MainForm.FRAME_ACTIVE, 0, array, 0, 4);
 			Array.Copy(byte_0, 0, array, 4, array.Length - 4);
-			this.method_21(array);
+			this.checkForDeviceAndSend(array);
 			this.CurStep = CurStepE.Active;
 		}
 
@@ -990,9 +926,9 @@ namespace ActiveClient
 				{
 					if (this.CurGroupIndex == 0)
 					{
-						int num = BitConverter.ToInt32(this.Eerom, 196616);
-						this.StartAddrGroup[1] = 196620;
-						this.EndAddrGroup[1] = 196620 + num * 12;
+						int num = BitConverter.ToInt32(this.Eerom, ID_COUNT_ADDR);
+						this.StartAddrGroup[1] = ID_START_ADDR;
+						this.EndAddrGroup[1] = ID_START_ADDR + num * 12;
 						this.MaxPrgPos = this.neYtqVfun();
 					}
 					this.CurGroupIndex++;
@@ -1002,17 +938,17 @@ namespace ActiveClient
 				}
 				else
 				{
-					this.method_19();
+					this.sendENDR();
 				}
 			}
 			else if (this.PrevAddr >> 16 != int_0 >> 16)
 			{
-				this.method_18(int_0);
+				this.changeBaseAddress(int_0);
 			}
 			else
 			{
 				int num2 = this.method_0(int_0, this.EndAddr);
-				this.method_16(int_0, num2);
+				this.readFromAddress(int_0, num2);
 				this.CurAddr += num2;
 			}
 		}
@@ -1030,22 +966,22 @@ namespace ActiveClient
 				}
 				else
 				{
-					this.method_20();
+					this.sendENDW();
 				}
 			}
 			else if (this.PrevAddr >> 16 != int_0 >> 16)
 			{
-				this.method_18(int_0);
+				this.changeBaseAddress(int_0);
 			}
 			else
 			{
 				int num = this.method_0(int_0, this.EndAddr);
-				this.method_17(int_0, num);
+				this.writeToAddress(int_0, num);
 				this.CurAddr += num;
 			}
 		}
 
-		private void method_16(int int_0, int int_1)
+		private void readFromAddress(int int_0, int int_1)
 		{
 			byte[] array = new byte[4]
 			{
@@ -1057,11 +993,11 @@ namespace ActiveClient
 			array[1] = (byte)(int_0 >> 8);
 			array[2] = (byte)int_0;
 			array[3] = (byte)int_1;
-			this.method_21(array);
+			this.checkForDeviceAndSend(array);
 			this.CurStep = CurStepE.Read;
 		}
 
-		private void method_17(int int_0, int int_1)
+		private void writeToAddress(int int_0, int int_1)
 		{
 			byte[] array = new byte[4 + int_1];
 			array[0] = 87;
@@ -1069,11 +1005,11 @@ namespace ActiveClient
 			array[2] = (byte)int_0;
 			array[3] = (byte)int_1;
 			Array.Copy(this.Eerom, int_0, array, 4, int_1);
-			this.method_21(array);
+			this.checkForDeviceAndSend(array);
 			this.CurStep = CurStepE.Write;
 		}
 
-		private void method_18(int int_0)
+		private void changeBaseAddress(int int_0)
 		{
 			byte[] array = new byte[8]
 			{
@@ -1092,30 +1028,30 @@ namespace ActiveClient
 			array[6] = (byte)(num >> 8);
 			array[7] = (byte)num;
 			this.PrevAddr = num;
-			this.method_21(array);
+			this.checkForDeviceAndSend(array);
 			this.CurStep = CurStepE.ChangeBaseAddr;
 		}
 
-		private void method_19()
+		private void sendENDR()
 		{
-			this.method_21(MainForm.FRAME_ENDR);
+			this.checkForDeviceAndSend(MainForm.FRAME_ENDR);
 			this.CurStep = CurStepE.EndRead;
 		}
 
-		private void method_20()
+		private void sendENDW()
 		{
-			this.method_21(MainForm.FRAME_ENDW);
+			this.checkForDeviceAndSend(MainForm.FRAME_ENDW);
 			this.CurStep = CurStepE.EndWrite;
 		}
 
-		private void method_21(byte[] byte_0)
+		private void checkForDeviceAndSend(byte[] byte_0)
 		{
 			SpecifiedDevice specifiedDevice = this.usbHidPort.SpecifiedDevice;
 			if (specifiedDevice != null)
 			{
-				Class2 @class = new Class2(specifiedDevice);
-				@class.PackData(byte_0);
-				specifiedDevice.SendData(@class);
+				USBDeviceWrapper device = new USBDeviceWrapper(specifiedDevice);
+				device.PackData(byte_0);
+				specifiedDevice.SendData(device);
 			}
 			else
 			{
@@ -1127,12 +1063,12 @@ namespace ActiveClient
 		{
 			this.StartAddrGroup = new int[2]
 			{
-				196608,
+				ID_BASE_ADDR,
 				0
 			};
 			this.EndAddrGroup = new int[2]
 			{
-				196620,
+				ID_START_ADDR,
 				0
 			};
 			this.CurGroupIndex = 0;
@@ -1148,14 +1084,14 @@ namespace ActiveClient
 		private void btnWrite_Click(object sender, EventArgs e)
 		{
 			byte[] array = this.method_6();
-			System.Buffer.BlockCopy(array, 0, this.Eerom, 196608, array.Length);
+			System.Buffer.BlockCopy(array, 0, this.Eerom, ID_BASE_ADDR, array.Length);
 			this.StartAddrGroup = new int[1]
 			{
-				196608
+				ID_BASE_ADDR
 			};
 			this.EndAddrGroup = new int[1]
 			{
-				196608 + array.Length
+				ID_BASE_ADDR + array.Length
 			};
 			this.CurGroupIndex = 0;
 			this.PrevAddr = 0;
@@ -1203,8 +1139,8 @@ namespace ActiveClient
 
 		private void btnPort_Click(object sender, EventArgs e)
 		{
-			ComForm comForm = new ComForm();
-			comForm.ShowDialog();
+			//ComForm comForm = new ComForm();
+			//comForm.ShowDialog();
 		}
 
 		private void btnImportCsv_Click(object sender, EventArgs e)
@@ -1300,158 +1236,185 @@ namespace ActiveClient
 
 		private void InitializeComponent()
 		{
-			this.components = new Container();
-			this.usbHidPort = new UsbHidPort(this.components);
+			this.components = new System.ComponentModel.Container();
+			this.usbHidPort = new UsbLibrary.UsbHidPort(this.components);
 			this.tmrDataRx = new System.Windows.Forms.Timer(this.components);
-			this.lstInfo = new ListBox();
-			this.prgAddr = new ProgressBar();
-			this.btnReadData = new Button();
-			this.btnSave = new Button();
-			this.btnWrite = new Button();
-			this.btnOpen = new Button();
-			this.ofdMain = new OpenFileDialog();
-			this.txtOffsetAddr = new TextBox();
-			this.lblOffsetAddr = new Label();
-			this.lblPos = new Label();
-			this.btnPort = new Button();
-			this.sptMain = new SerialPort(this.components);
-			this.dgvId = new DataGridView();
-			this.txtVersion = new TextBox();
-			this.lblVersion = new Label();
-			this.btnImportCsv = new Button();
-			this.ofdCsv = new OpenFileDialog();
-			((ISupportInitialize)this.dgvId).BeginInit();
-			base.SuspendLayout();
+			this.lstInfo = new System.Windows.Forms.ListBox();
+			this.prgAddr = new System.Windows.Forms.ProgressBar();
+			this.btnReadData = new System.Windows.Forms.Button();
+			this.btnSave = new System.Windows.Forms.Button();
+			this.btnWrite = new System.Windows.Forms.Button();
+			this.btnOpen = new System.Windows.Forms.Button();
+			this.ofdMain = new System.Windows.Forms.OpenFileDialog();
+			this.txtOffsetAddr = new System.Windows.Forms.TextBox();
+			this.lblOffsetAddr = new System.Windows.Forms.Label();
+			this.lblPos = new System.Windows.Forms.Label();
+			this.sptMain = new System.IO.Ports.SerialPort(this.components);
+			this.dgvId = new System.Windows.Forms.DataGridView();
+			this.txtVersion = new System.Windows.Forms.TextBox();
+			this.lblVersion = new System.Windows.Forms.Label();
+			this.btnImportCsv = new System.Windows.Forms.Button();
+			this.ofdCsv = new System.Windows.Forms.OpenFileDialog();
+			((System.ComponentModel.ISupportInitialize)(this.dgvId)).BeginInit();
+			this.SuspendLayout();
+			// 
+			// usbHidPort
+			// 
 			this.usbHidPort.ProductId = 115;
 			this.usbHidPort.VendorId = 5538;
-			this.usbHidPort.OnSpecifiedDeviceRemoved += this.usbHidPort_OnSpecifiedDeviceRemoved;
-			this.usbHidPort.OnDeviceArrived += this.usbHidPort_OnDeviceArrived;
-			this.usbHidPort.OnDeviceRemoved += this.usbHidPort_OnDeviceRemoved;
-			this.usbHidPort.OnDataRecieved += this.usbHidPort_OnDataRecieved;
-			this.usbHidPort.OnSpecifiedDeviceArrived += this.usbHidPort_OnSpecifiedDeviceArrived;
-			this.usbHidPort.OnDataSend += this.usbHidPort_OnDataSend;
+			// 
+			// tmrDataRx
+			// 
 			this.tmrDataRx.Interval = 3000;
-			this.tmrDataRx.Tick += this.tmrDataRx_Tick;
+			// 
+			// lstInfo
+			// 
 			this.lstInfo.FormattingEnabled = true;
-			this.lstInfo.ItemHeight = 12;
-			this.lstInfo.Location = new Point(25, 15);
+			this.lstInfo.Location = new System.Drawing.Point(25, 15);
 			this.lstInfo.Name = "lstInfo";
-			this.lstInfo.Size = new Size(407, 232);
+			this.lstInfo.Size = new System.Drawing.Size(407, 225);
 			this.lstInfo.TabIndex = 2;
-			this.prgAddr.Location = new Point(108, 259);
+			// 
+			// prgAddr
+			// 
+			this.prgAddr.Location = new System.Drawing.Point(108, 259);
 			this.prgAddr.Name = "prgAddr";
-			this.prgAddr.Size = new Size(316, 23);
+			this.prgAddr.Size = new System.Drawing.Size(316, 23);
 			this.prgAddr.TabIndex = 3;
-			this.btnReadData.Location = new Point(42, 351);
+			// 
+			// btnReadData
+			// 
+			this.btnReadData.Location = new System.Drawing.Point(42, 351);
 			this.btnReadData.Name = "btnReadData";
-			this.btnReadData.Size = new Size(75, 23);
+			this.btnReadData.Size = new System.Drawing.Size(75, 23);
 			this.btnReadData.TabIndex = 4;
 			this.btnReadData.Text = "Read";
 			this.btnReadData.UseVisualStyleBackColor = true;
-			this.btnReadData.Click += this.btnReadData_Click;
-			this.btnSave.Location = new Point(334, 391);
+			this.btnReadData.Click += new EventHandler(btnReadData_Click);
+			// 
+			// btnSave
+			// 
+			this.btnSave.Location = new System.Drawing.Point(334, 391);
 			this.btnSave.Name = "btnSave";
-			this.btnSave.Size = new Size(75, 23);
+			this.btnSave.Size = new System.Drawing.Size(75, 23);
 			this.btnSave.TabIndex = 7;
 			this.btnSave.Text = "Save";
 			this.btnSave.UseVisualStyleBackColor = true;
-			this.btnSave.Visible = false;
-			this.btnSave.Click += this.btnSave_Click;
-			this.btnWrite.Location = new Point(140, 351);
+			this.btnSave.Click += new EventHandler(btnSave_Click);
+			// 
+			// btnWrite
+			// 
+			this.btnWrite.Location = new System.Drawing.Point(140, 351);
 			this.btnWrite.Name = "btnWrite";
-			this.btnWrite.Size = new Size(75, 23);
+			this.btnWrite.Size = new System.Drawing.Size(75, 23);
 			this.btnWrite.TabIndex = 8;
 			this.btnWrite.Text = "Write";
 			this.btnWrite.UseVisualStyleBackColor = true;
-			this.btnWrite.Click += this.btnWrite_Click;
-			this.btnOpen.Location = new Point(244, 391);
+			this.btnWrite.Click += new EventHandler(btnWrite_Click);
+			// 
+			// btnOpen
+			// 
+			this.btnOpen.Location = new System.Drawing.Point(244, 391);
 			this.btnOpen.Name = "btnOpen";
-			this.btnOpen.Size = new Size(75, 23);
+			this.btnOpen.Size = new System.Drawing.Size(75, 23);
 			this.btnOpen.TabIndex = 9;
 			this.btnOpen.Text = "Open";
 			this.btnOpen.UseVisualStyleBackColor = true;
-			this.btnOpen.Visible = false;
-			this.btnOpen.Click += this.btnOpen_Click;
-            this.ofdMain.Filter = "data file (*.bin)|*.bin";
-			this.txtOffsetAddr.Location = new Point(108, 393);
+			this.btnOpen.Click += new EventHandler(btnOpen_Click);
+			// 
+			// ofdMain
+			// 
+			this.ofdMain.Filter = "data file (*.bin)|*.bin";
+			// 
+			// txtOffsetAddr
+			// 
+			this.txtOffsetAddr.Location = new System.Drawing.Point(108, 393);
 			this.txtOffsetAddr.Name = "txtOffsetAddr";
-			this.txtOffsetAddr.Size = new Size(107, 21);
+			this.txtOffsetAddr.Size = new System.Drawing.Size(107, 20);
 			this.txtOffsetAddr.TabIndex = 11;
-			this.txtOffsetAddr.Visible = false;
+			// 
+			// lblOffsetAddr
+			// 
 			this.lblOffsetAddr.AutoSize = true;
-			this.lblOffsetAddr.Location = new Point(9, 396);
+			this.lblOffsetAddr.Location = new System.Drawing.Point(9, 396);
 			this.lblOffsetAddr.Name = "lblOffsetAddr";
-			this.lblOffsetAddr.Size = new Size(89, 12);
+			this.lblOffsetAddr.Size = new System.Drawing.Size(76, 13);
 			this.lblOffsetAddr.TabIndex = 12;
 			this.lblOffsetAddr.Text = "Offset Address";
-			this.lblOffsetAddr.Visible = false;
+			// 
+			// lblPos
+			// 
 			this.lblPos.AutoSize = true;
-			this.lblPos.Location = new Point(53, 264);
+			this.lblPos.Location = new System.Drawing.Point(53, 264);
 			this.lblPos.Name = "lblPos";
-			this.lblPos.Size = new Size(11, 12);
+			this.lblPos.Size = new System.Drawing.Size(13, 13);
 			this.lblPos.TabIndex = 10;
 			this.lblPos.Text = "0";
-			this.btnPort.Location = new Point(244, 432);
-			this.btnPort.Name = "btnPort";
-			this.btnPort.Size = new Size(75, 23);
-			this.btnPort.TabIndex = 13;
-			this.btnPort.Text = "Port";
-			this.btnPort.UseVisualStyleBackColor = true;
-			this.btnPort.Visible = false;
-			this.btnPort.Click += this.btnPort_Click;
-			this.sptMain.DataReceived += this.sptMain_DataReceived;
-			this.dgvId.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dgvId.Location = new Point(468, 15);
+			// 
+			// dgvId
+			// 
+			this.dgvId.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dgvId.Location = new System.Drawing.Point(468, 15);
 			this.dgvId.Name = "dgvId";
 			this.dgvId.RowHeadersWidth = 60;
 			this.dgvId.RowTemplate.Height = 23;
-			this.dgvId.Size = new Size(497, 481);
+			this.dgvId.Size = new System.Drawing.Size(497, 481);
 			this.dgvId.TabIndex = 14;
-			this.dgvId.RowPostPaint += this.dgvId_RowPostPaint;
-			this.txtVersion.Location = new Point(108, 306);
+			// 
+			// txtVersion
+			// 
+			this.txtVersion.Location = new System.Drawing.Point(108, 306);
 			this.txtVersion.MaxLength = 4;
 			this.txtVersion.Name = "txtVersion";
-			this.txtVersion.Size = new Size(100, 21);
+			this.txtVersion.Size = new System.Drawing.Size(100, 20);
 			this.txtVersion.TabIndex = 15;
 			this.txtVersion.Text = "001";
+			// 
+			// lblVersion
+			// 
 			this.lblVersion.AutoSize = true;
-			this.lblVersion.Location = new Point(51, 309);
+			this.lblVersion.Location = new System.Drawing.Point(51, 309);
 			this.lblVersion.Name = "lblVersion";
-			this.lblVersion.Size = new Size(47, 12);
+			this.lblVersion.Size = new System.Drawing.Size(42, 13);
 			this.lblVersion.TabIndex = 16;
 			this.lblVersion.Text = "Version";
-			this.btnImportCsv.Location = new Point(244, 351);
+			// 
+			// btnImportCsv
+			// 
+			this.btnImportCsv.Location = new System.Drawing.Point(244, 351);
 			this.btnImportCsv.Name = "btnImportCsv";
-			this.btnImportCsv.Size = new Size(75, 23);
+			this.btnImportCsv.Size = new System.Drawing.Size(75, 23);
 			this.btnImportCsv.TabIndex = 17;
 			this.btnImportCsv.Text = "Import csv";
 			this.btnImportCsv.UseVisualStyleBackColor = true;
-			this.btnImportCsv.Click += this.btnImportCsv_Click;
-            this.ofdCsv.Filter = "data file (*.csv)|*.csv";
-			base.AutoScaleDimensions = new SizeF(6f, 12f);
-			base.AutoScaleMode = AutoScaleMode.Font;
-			base.ClientSize = new Size(994, 519);
-			base.Controls.Add(this.btnImportCsv);
-			base.Controls.Add(this.lblVersion);
-			base.Controls.Add(this.txtVersion);
-			base.Controls.Add(this.dgvId);
-			base.Controls.Add(this.btnPort);
-			base.Controls.Add(this.lblOffsetAddr);
-			base.Controls.Add(this.txtOffsetAddr);
-			base.Controls.Add(this.lblPos);
-			base.Controls.Add(this.btnOpen);
-			base.Controls.Add(this.btnWrite);
-			base.Controls.Add(this.btnSave);
-			base.Controls.Add(this.btnReadData);
-			base.Controls.Add(this.prgAddr);
-			base.Controls.Add(this.lstInfo);
-			base.Name = "MainForm";
+			this.btnImportCsv.Click += new EventHandler(btnImportCsv_Click);
+			// 
+			// ofdCsv
+			// 
+			this.ofdCsv.Filter = "data file (*.csv)|*.csv";
+			// 
+			// MainForm
+			// 
+			this.ClientSize = new System.Drawing.Size(994, 519);
+			this.Controls.Add(this.btnImportCsv);
+			this.Controls.Add(this.lblVersion);
+			this.Controls.Add(this.txtVersion);
+			this.Controls.Add(this.dgvId);
+			this.Controls.Add(this.lblOffsetAddr);
+			this.Controls.Add(this.txtOffsetAddr);
+			this.Controls.Add(this.lblPos);
+			this.Controls.Add(this.btnOpen);
+			this.Controls.Add(this.btnWrite);
+			this.Controls.Add(this.btnSave);
+			this.Controls.Add(this.btnReadData);
+			this.Controls.Add(this.prgAddr);
+			this.Controls.Add(this.lstInfo);
+			this.Name = "MainForm";
 			this.Text = "ID Library";
-			base.Load += this.MainForm_Load;
-			base.FormClosing += this.MainForm_FormClosing;
-			((ISupportInitialize)this.dgvId).EndInit();
-			base.ResumeLayout(false);
-			base.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dgvId)).EndInit();
+			this.ResumeLayout(false);
+			this.PerformLayout();
+
 		}
 
 		[CompilerGenerated]

@@ -59,7 +59,7 @@ namespace DMR
 			this.btnCancel.Text = "Cancel";
 			this.btnCancel.UseVisualStyleBackColor = true;
 			this.btnCancel.Click += this.btnCancel_Click;
-			this.btnOK.DialogResult = DialogResult.OK;
+//			this.btnOK.DialogResult = DialogResult.OK;
 			this.btnOK.Location = new Point(56, 121);
 			this.btnOK.Name = "btnOK";
 			this.btnOK.Size = new Size(75, 23);
@@ -75,20 +75,20 @@ namespace DMR
 			this.btnRefresh.UseVisualStyleBackColor = true;
 			this.btnRefresh.Click += this.btnRefresh_Click;
 			base.AutoScaleDimensions = new SizeF(6f, 12f);
-			base.AutoScaleMode = AutoScaleMode.Font;
-			base.ClientSize = new Size(310, 214);
-			base.Controls.Add(this.btnRefresh);
-			base.Controls.Add(this.btnCancel);
-			base.Controls.Add(this.btnOK);
-			base.Controls.Add(this.cmbPort);
-			base.Controls.Add(this.lblPort);
-			base.FormBorderStyle = FormBorderStyle.FixedDialog;
-			base.Name = "ComForm";
-			base.StartPosition = FormStartPosition.CenterScreen;
+//			base.AutoScaleMode = AutoScaleMode.Font;
+			this.ClientSize = new Size(310, 214);
+			this.Controls.Add(this.btnRefresh);
+			this.Controls.Add(this.btnCancel);
+			this.Controls.Add(this.btnOK);
+			this.Controls.Add(this.cmbPort);
+			this.Controls.Add(this.lblPort);
+//			this.FormBorderStyle = FormBorderStyle.FixedDialog;
+			this.Name = "ComForm";
+			this.StartPosition = FormStartPosition.CenterScreen;
 			this.Text = "Port Setting";
-			base.Load += this.ComForm_Load;
-			base.ResumeLayout(false);
-			base.PerformLayout();
+			this.Load += new EventHandler(this.ComForm_Load);
+			this.ResumeLayout(false);
+			this.PerformLayout();
 		}
 
 		public ComForm()
@@ -98,7 +98,7 @@ namespace DMR
 			this.InitializeComponent();
 		}
 
-		private void method_0()
+		private void refresh()
 		{
 			this.cmbPort.Items.Clear();
 			string[] portNames = SerialPort.GetPortNames();
@@ -111,7 +111,7 @@ namespace DMR
 
 		private void ComForm_Load(object sender, EventArgs e)
 		{
-			this.method_0();
+			this.refresh();
 			this.cmbPort.SelectedItem = MainForm.CurCom;
 		}
 
@@ -120,7 +120,7 @@ namespace DMR
 			try
 			{
 				MainForm.CurCom = this.cmbPort.SelectedItem.ToString();
-				Class1.smethod_6("Setup", "Com", MainForm.CurCom);
+				IniFileUtils.smethod_6("Setup", "Com", MainForm.CurCom);
 				base.Close();
 			}
 			catch (Exception ex)
@@ -136,7 +136,7 @@ namespace DMR
 
 		private void btnRefresh_Click(object sender, EventArgs e)
 		{
-			this.method_0();
+			this.refresh();
 		}
 	}
 }
