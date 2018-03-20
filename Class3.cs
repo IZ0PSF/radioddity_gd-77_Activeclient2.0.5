@@ -2,7 +2,7 @@ using ActiveClient;
 using System;
 using System.Windows.Forms;
 
-internal static class MainApplication
+internal static class Class3
 {
 	[STAThread]
 	private static void Main()

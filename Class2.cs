@@ -1,10 +1,12 @@
 using System;
 using UsbLibrary;
 
-internal class USBDeviceWrapper : SpecifiedOutputReport
+internal class Class2 : SpecifiedOutputReport
 {
-	public USBDeviceWrapper(HIDDevice hiddevice_0):base(hiddevice_0)
+	public Class2(HIDDevice hiddevice_0):base(hiddevice_0)
 	{
+//		Class5.XCUF1frzK2Woy();
+//		base._002Ector(hiddevice_0);
 	}
 
 	public override void PackData(byte[] byte_0)
